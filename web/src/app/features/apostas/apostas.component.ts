@@ -83,23 +83,32 @@ export class ApostasComponent implements OnInit {
 
   // --- modal ---
   openModal(): void { this.modalOpen.set(true); }
-  closeModal(): void { this.modalOpen.set(false); }
+  closeModal(): void {
+    this.modalOpen.set(false);
+    this.resetForms(); // sem isto, reabrir o modal mantinha a modalidade/campeonato antigos
+  }
 
   setType(type: 'Simples' | 'Multipla'): void { this.betType.set(type); }
 
   // --- cascata Simples ---
   // Campeonato e Equipa carregam em paralelo, os dois dependem só da
   // Modalidade (uma equipa pode jogar em vários campeonatos ao mesmo tempo).
+  // Cada resposta só é aplicada se a modalidade ainda for a que a pediu —
+  // evita que uma resposta atrasada de uma seleção anterior "pise" a atual.
   onSimplesSportChange(opt: SelectOption | null): void {
     this.simples.set({ ...emptyLeg(), sport: opt });
     if (opt) {
-      this.api.getLeagues(opt.id as number).subscribe(leagues => {
+      const sportId = opt.id;
+      this.api.getLeagues(sportId as number).subscribe(leagues => {
+        if (this.simples().sport?.id !== sportId) return; // modalidade já mudou entretanto
         this.simples.update(l => ({ ...l, leagues }));
       });
-      this.api.getTeams(opt.id as number).subscribe(teams => {
+      this.api.getTeams(sportId as number).subscribe(teams => {
+        if (this.simples().sport?.id !== sportId) return;
         this.simples.update(l => ({ ...l, teams }));
       });
-      this.api.getMarkets(opt.id as number).subscribe(markets => {
+      this.api.getMarkets(sportId as number).subscribe(markets => {
+        if (this.simples().sport?.id !== sportId) return;
         this.simples.update(l => ({ ...l, markets }));
       });
     }
@@ -136,13 +145,17 @@ export class ApostasComponent implements OnInit {
   onLegSportChange(index: number, opt: SelectOption | null): void {
     this.legs.update(legs => legs.map((l, i) => (i === index ? { ...emptyLeg(), sport: opt, odd: l.odd } : l)));
     if (opt) {
-      this.api.getLeagues(opt.id as number).subscribe(leagues => {
+      const sportId = opt.id;
+      this.api.getLeagues(sportId as number).subscribe(leagues => {
+        if (this.legs()[index]?.sport?.id !== sportId) return; // já mudaste de modalidade nesta linha
         this.legs.update(legs => legs.map((l, i) => (i === index ? { ...l, leagues } : l)));
       });
-      this.api.getTeams(opt.id as number).subscribe(teams => {
+      this.api.getTeams(sportId as number).subscribe(teams => {
+        if (this.legs()[index]?.sport?.id !== sportId) return;
         this.legs.update(legs => legs.map((l, i) => (i === index ? { ...l, teams } : l)));
       });
-      this.api.getMarkets(opt.id as number).subscribe(markets => {
+      this.api.getMarkets(sportId as number).subscribe(markets => {
+        if (this.legs()[index]?.sport?.id !== sportId) return;
         this.legs.update(legs => legs.map((l, i) => (i === index ? { ...l, markets } : l)));
       });
     }
