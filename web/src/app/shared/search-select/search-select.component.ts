@@ -12,7 +12,13 @@ export interface SelectOption {
   templateUrl: './search-select.component.html'
 })
 export class SearchSelectComponent {
-  @Input() options: SelectOption[] = [];
+  // "options" entra como @Input normal, mas alimenta um signal interno —
+  // sem isto, o computed() abaixo só recalcula quando "query" muda, nunca
+  // quando a lista de opções chega da API depois de escolher a modalidade.
+  private _options = signal<SelectOption[]>([]);
+  @Input() set options(value: SelectOption[]) { this._options.set(value ?? []); }
+  get options(): SelectOption[] { return this._options(); }
+
   @Input() placeholder = 'Pesquisar…';
   @Input() disabled = false;
   @Input() disabledHint = 'Escolhe primeiro a opção anterior';
@@ -24,7 +30,7 @@ export class SearchSelectComponent {
 
   filtered = computed(() => {
     const q = this.query().toLowerCase();
-    return this.options.filter(o => o.label.toLowerCase().includes(q));
+    return this._options().filter(o => o.label.toLowerCase().includes(q));
   });
 
   onFocus(): void {
