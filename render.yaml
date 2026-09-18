@@ -1,6 +1,3 @@
-# Blueprint do Render
-# Cria automaticamente o frontend e a API
-
 services:
 
   # =====================================================
@@ -28,22 +25,18 @@ services:
 
 
   # =====================================================
-  # BACKEND ASP.NET CORE
+  # BACKEND ASP.NET
   # =====================================================
 
   - type: web
     name: stake-api
-
     runtime: docker
-
     plan: free
 
     rootDir: api/StakeApi
-
     dockerfilePath: ./Dockerfile
 
     envVars:
-
       - key: ConnectionStrings__DefaultConnection
         sync: false
 
