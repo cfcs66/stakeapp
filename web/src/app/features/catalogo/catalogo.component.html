@@ -1,0 +1,112 @@
+<div class="page-head">
+  <div>
+    <div class="page-title">Catálogo</div>
+    <div class="page-desc">Gere as modalidades, campeonatos e equipas usadas nas apostas</div>
+  </div>
+</div>
+
+<div class="catalog-grid">
+  <!-- ---- Modalidades ---- -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Modalidades</div></div>
+
+    <div class="catalog-list">
+      @for (sport of sports(); track sport.id) {
+        <div class="catalog-item" [class.selected]="selectedSport()?.id === sport.id" (click)="selectSport(sport)">
+          <span>{{ sport.name }}</span>
+          <button class="catalog-item-remove" (click)="removeSport(sport, $event)">✕</button>
+        </div>
+      } @empty {
+        <div class="catalog-empty">Ainda não tens modalidades.</div>
+      }
+    </div>
+
+    <div class="catalog-add-row">
+      <input type="text" placeholder="Ex: Futebol" [value]="newSportName()"
+        (input)="newSportName.set($any($event.target).value)"
+        (keyup.enter)="addSport()">
+      <button (click)="addSport()">+</button>
+    </div>
+  </div>
+
+  <!-- ---- Campeonatos ---- -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Campeonatos</div></div>
+
+    @if (!selectedSport()) {
+      <div class="catalog-empty">Escolhe uma modalidade</div>
+    } @else {
+      <div class="catalog-list">
+        @for (league of leagues(); track league.id) {
+          <div class="catalog-item" style="cursor:default;">
+            <span>{{ league.name }}</span>
+            <button class="catalog-item-remove" (click)="removeLeague(league, $event)">✕</button>
+          </div>
+        } @empty {
+          <div class="catalog-empty">Ainda não tens campeonatos em {{ selectedSport()!.name }}.</div>
+        }
+      </div>
+
+      <div class="catalog-add-row">
+        <input type="text" placeholder="Ex: Liga Portugal" [value]="newLeagueName()"
+          (input)="newLeagueName.set($any($event.target).value)"
+          (keyup.enter)="addLeague()">
+        <button (click)="addLeague()">+</button>
+      </div>
+    }
+  </div>
+
+  <!-- ---- Equipas ---- -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Equipas</div></div>
+
+    @if (!selectedSport()) {
+      <div class="catalog-empty">Escolhe uma modalidade</div>
+    } @else {
+      <div class="catalog-list">
+        @for (team of teams(); track team.id) {
+          <div class="catalog-item" style="cursor:default;">
+            <span>{{ team.name }}</span>
+            <button class="catalog-item-remove" (click)="removeTeam(team, $event)">✕</button>
+          </div>
+        } @empty {
+          <div class="catalog-empty">Ainda não tens equipas em {{ selectedSport()!.name }}.</div>
+        }
+      </div>
+
+      <div class="catalog-add-row">
+        <input type="text" placeholder="Ex: FC Porto" [value]="newTeamName()"
+          (input)="newTeamName.set($any($event.target).value)"
+          (keyup.enter)="addTeam()">
+        <button (click)="addTeam()">+</button>
+      </div>
+    }
+  </div>
+
+  <!-- ---- Mercados ---- -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Mercados</div></div>
+
+    @if (!selectedSport()) {
+      <div class="catalog-empty">Escolhe uma modalidade</div>
+    } @else {
+      <div class="catalog-list">
+        @for (market of markets(); track market.id) {
+          <div class="catalog-item" style="cursor:default;">
+            <span>{{ market.name }}</span>
+            <button class="catalog-item-remove" (click)="removeMarket(market, $event)">✕</button>
+          </div>
+        } @empty {
+          <div class="catalog-empty">Ainda não tens mercados em {{ selectedSport()!.name }}.</div>
+        }
+      </div>
+
+      <div class="catalog-add-row">
+        <input type="text" placeholder="Ex: 1X2" [value]="newMarketName()"
+          (input)="newMarketName.set($any($event.target).value)"
+          (keyup.enter)="addMarket()">
+        <button (click)="addMarket()">+</button>
+      </div>
+    }
+  </div>
+</div>

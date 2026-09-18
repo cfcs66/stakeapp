@@ -1,0 +1,135 @@
+<div class="page-head">
+  <div>
+    <div class="page-title">Estatísticas</div>
+    <div class="page-desc">Análise de performance por equipa, mercado e período</div>
+  </div>
+</div>
+
+<div class="filters">
+  <button class="chip" [class.active]="subTab() === 'geral'" (click)="setSubTab('geral')">Geral</button>
+  <button class="chip" [class.active]="subTab() === 'equipa'" (click)="setSubTab('equipa')">Por Equipa</button>
+  <button class="chip" [class.active]="subTab() === 'tipo'" (click)="setSubTab('tipo')">Por Tipo de Aposta</button>
+</div>
+
+<!-- ---- Geral ---- -->
+@if (subTab() === 'geral') {
+  <div class="stat-strip" style="grid-template-columns:repeat(2,1fr)">
+    <div class="stat-cell"><div class="stat-cell-label">Apostas no Mês</div><div class="stat-cell-value">{{ general().apostasNoMes }}</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">Lucro Mensal</div><div class="stat-cell-value" [style.color]="general().lucroMensal >= 0 ? 'var(--win)' : 'var(--loss)'">{{ formatMoney(general().lucroMensal) }}</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Calendário de Resultados</div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" (click)="prevMonth()">‹</button>
+          <span class="cal-month-label">{{ monthLabel() }}</span>
+          <button class="cal-nav-btn" (click)="nextMonth()">›</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-dow">Seg</div><div class="cal-dow">Ter</div><div class="cal-dow">Qua</div>
+        <div class="cal-dow">Qui</div><div class="cal-dow">Sex</div><div class="cal-dow">Sáb</div><div class="cal-dow">Dom</div>
+      </div>
+      <div class="cal-grid">
+        @for (cell of calendarGrid(); track cell.day) {
+          <div class="cal-cell clickable" [class]="cell.status" [class.selected]="selectedDay() === cell.day" (click)="selectDay(cell.day)">
+            <div class="cal-day-num">{{ cell.day }}</div>
+            @if (cell.valor !== undefined) {
+              <div class="cal-figures"><div class="cal-value">{{ formatMoney(cell.valor) }}</div></div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Detalhe do Dia</div>
+        <div class="panel-link">{{ selectedDay() ? selectedDay() + ' ' + monthLabel() : '—' }}</div>
+      </div>
+      <div class="ticket-list">
+        @if (selectedDay() === null) {
+          <div class="day-detail-empty">Seleciona um dia no calendário</div>
+        } @else {
+          @for (bet of dayBets(); track bet.id) {
+            <app-bet-ticket [bet]="bet"></app-bet-ticket>
+          } @empty {
+            <div class="day-detail-empty">Sem apostas registadas neste dia</div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ---- Por Equipa ---- -->
+@if (subTab() === 'equipa') {
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Performance por Equipa</div></div>
+    <table class="move-table">
+      <thead>
+        <tr>
+          <th>Equipa</th><th>Campeonatos</th><th>Desporto</th><th style="text-align:right">Apostas</th>
+          <th style="text-align:right">Win Rate</th><th style="text-align:right">Lucro</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of teamStats(); track t.equipa + t.desporto) {
+          <tr>
+            <td style="font-weight:600">{{ t.equipa }}</td>
+            <td style="color:var(--ink-soft)">{{ t.campeonatos }}</td>
+            <td style="color:var(--ink-soft)">{{ t.desporto }}</td>
+            <td class="num" style="text-align:right">{{ t.apostas }}</td>
+            <td class="num" style="text-align:right">{{ t.winRate }}%</td>
+            <td class="num" style="text-align:right" [style.color]="t.lucro >= 0 ? 'var(--win)' : 'var(--loss)'">{{ formatMoney(t.lucro) }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="day-detail-empty">Sem dados ainda.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- ---- Por Tipo de Aposta ---- -->
+@if (subTab() === 'tipo') {
+  <div class="panel" style="margin-bottom:14px">
+    <div class="panel-head"><div class="panel-title">Tipo de Aposta</div></div>
+    <table class="move-table">
+      <thead>
+        <tr><th>Tipo</th><th style="text-align:right">Apostas</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Lucro</th></tr>
+      </thead>
+      <tbody>
+        @for (t of typeStats(); track t.tipo) {
+          <tr>
+            <td style="font-weight:600">{{ t.tipo }}</td>
+            <td class="num" style="text-align:right">{{ t.apostas }}</td>
+            <td class="num" style="text-align:right">{{ t.winRate }}%</td>
+            <td class="num" style="text-align:right" [style.color]="t.lucro >= 0 ? 'var(--win)' : 'var(--loss)'">{{ formatMoney(t.lucro) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Mercados</div></div>
+    <table class="move-table">
+      <thead>
+        <tr><th>Mercado</th><th style="text-align:right">Apostas</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Lucro</th></tr>
+      </thead>
+      <tbody>
+        @for (m of marketStats(); track m.mercado) {
+          <tr>
+            <td style="font-weight:600">{{ m.mercado }}</td>
+            <td class="num" style="text-align:right">{{ m.apostas }}</td>
+            <td class="num" style="text-align:right">{{ m.winRate }}%</td>
+            <td class="num" style="text-align:right" [style.color]="m.lucro >= 0 ? 'var(--win)' : 'var(--loss)'">{{ formatMoney(m.lucro) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

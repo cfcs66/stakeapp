@@ -1,0 +1,22 @@
+<div class="combo">
+  <div class="combo-input-wrap">
+    <input
+      class="combo-input"
+      type="text"
+      [placeholder]="disabled ? disabledHint : placeholder"
+      [disabled]="disabled"
+      [value]="value?.label ?? query()"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (input)="onInput($any($event.target).value)">
+    @if (open() && !disabled) {
+      <div class="combo-list open">
+        @for (opt of filtered(); track opt.id) {
+          <div class="combo-option" (mousedown)="select(opt)">{{ opt.label }}</div>
+        } @empty {
+          <div class="combo-empty">Sem resultados</div>
+        }
+      </div>
+    }
+  </div>
+</div>

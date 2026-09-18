@@ -1,0 +1,47 @@
+@if (isLoginPage()) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span>S</span></div>
+        <div>
+          <div class="brand-name">Stake</div>
+          <div class="brand-sub">Gestão de Banca</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+          <span class="nav-icon">▤</span> Dashboard
+        </a>
+        <a class="nav-item" routerLink="/apostas" routerLinkActive="active">
+          <span class="nav-icon">🎫</span> Apostas
+        </a>
+        <a class="nav-item" routerLink="/estatisticas" routerLinkActive="active">
+          <span class="nav-icon">📈</span> Estatísticas
+        </a>
+        <a class="nav-item" routerLink="/banca" routerLinkActive="active">
+          <span class="nav-icon">◈</span> Banca
+        </a>
+        <a class="nav-item" routerLink="/catalogo" routerLinkActive="active">
+          <span class="nav-icon">🗂</span> Catálogo
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="bank-mini-label">Banca Atual</div>
+        @if (bankState.currentBank() !== null) {
+          <div class="bank-mini-value">{{ formatMoney(bankState.currentBank()!) }}</div>
+        } @else {
+          <div class="bank-mini-value">—</div>
+        }
+        <button class="chip" style="margin-top:10px;width:100%;" (click)="logout()">Sair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+}

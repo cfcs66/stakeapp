@@ -1,0 +1,217 @@
+<div class="page-head">
+  <div>
+    <div class="page-title">Apostas</div>
+    <div class="page-desc">Regista e acompanha todas as tuas apostas</div>
+  </div>
+  <button class="new-bet-toggle" (click)="openModal()">+ Nova Aposta</button>
+</div>
+
+<div class="filters">
+  <button class="chip" [class.active]="filter() === 'todas'" (click)="setFilter('todas')">Todas · {{ counts().todas }}</button>
+  <button class="chip" [class.active]="filter() === 'Pendente'" (click)="setFilter('Pendente')">Pendentes · {{ counts().Pendente }}</button>
+  <button class="chip" [class.active]="filter() === 'Ganha'" (click)="setFilter('Ganha')">Ganhas · {{ counts().Ganha }}</button>
+  <button class="chip" [class.active]="filter() === 'Perdida'" (click)="setFilter('Perdida')">Perdidas · {{ counts().Perdida }}</button>
+</div>
+
+<div class="ticket-list">
+  @for (bet of filteredBets(); track bet.id) {
+    <div>
+      <app-bet-ticket [bet]="bet"></app-bet-ticket>
+      @if (bet.status === 'Pendente') {
+        <div style="display:flex;gap:8px;margin:-4px 0 10px 0;">
+          <button class="chip" (click)="markResult(bet, 'Ganha')">Marcar Ganha</button>
+          <button class="chip" (click)="markResult(bet, 'Perdida')">Marcar Perdida</button>
+          <button class="chip" (click)="markResult(bet, 'Anulada')">Anular</button>
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="day-detail-empty">Ainda não tens apostas registadas.</div>
+  }
+</div>
+
+<!-- ============ MODAL: NOVA APOSTA ============ -->
+@if (modalOpen()) {
+  <div class="modal-backdrop open" (mousedown)="closeModal()">
+    <div class="modal" (mousedown)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Registar Nova Aposta</div>
+          <div class="modal-sub">Preenche os dados consoante o tipo de aposta</div>
+        </div>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="type-toggle">
+        <button [class.active]="betType() === 'Simples'" (click)="setType('Simples')">Simples</button>
+        <button [class.active]="betType() === 'Multipla'" (click)="setType('Multipla')">Múltipla</button>
+      </div>
+
+      <!-- ---- Simples ---- -->
+      @if (betType() === 'Simples') {
+        <div class="nb-grid">
+          <div class="nb-field">
+            <label>Desporto</label>
+            <app-search-select
+              [options]="sportOptions()"
+              [value]="simples().sport"
+              placeholder="Pesquisar desporto…"
+              (valueChange)="onSimplesSportChange($event)"></app-search-select>
+          </div>
+          <div class="nb-field">
+            <label>Campeonato</label>
+            <app-search-select
+              [options]="simplesLeagueOptions()"
+              [value]="simples().league"
+              [disabled]="!simples().sport"
+              disabledHint="Escolhe primeiro o desporto"
+              placeholder="Pesquisar campeonato…"
+              (valueChange)="onSimplesLeagueChange($event)"></app-search-select>
+          </div>
+          <div class="nb-field">
+            <label>Equipa Casa</label>
+            <app-search-select
+              [options]="simplesTeamOptions()"
+              [value]="simples().homeTeam"
+              [disabled]="!simples().sport"
+              disabledHint="Escolhe primeiro o desporto"
+              placeholder="Pesquisar equipa…"
+              (valueChange)="onSimplesHomeTeamChange($event)"></app-search-select>
+          </div>
+          <div class="nb-field">
+            <label>Equipa Fora</label>
+            <app-search-select
+              [options]="simplesTeamOptions()"
+              [value]="simples().awayTeam"
+              [disabled]="!simples().sport"
+              disabledHint="Escolhe primeiro o desporto"
+              placeholder="Pesquisar equipa…"
+              (valueChange)="onSimplesAwayTeamChange($event)"></app-search-select>
+          </div>
+          <div class="nb-field wide">
+            <label>Mercado</label>
+            <app-search-select
+              [options]="simplesMarketOptions()"
+              [value]="simples().market"
+              [disabled]="!simples().sport"
+              disabledHint="Escolhe primeiro o desporto"
+              placeholder="Pesquisar mercado…"
+              (valueChange)="onSimplesMarketChange($event)"></app-search-select>
+          </div>
+          <div class="nb-field">
+            <label>Odd</label>
+            <input type="text" placeholder="1,85"
+              [value]="simples().odd"
+              (input)="onSimplesOddInput($any($event.target).value)">
+          </div>
+          <div class="nb-field">
+            <label>Valor (€)</label>
+            <input type="text" placeholder="20,00"
+              [value]="simplesStake()"
+              (input)="simplesStake.set($any($event.target).value)">
+          </div>
+        </div>
+      }
+
+      <!-- ---- Múltipla ---- -->
+      @if (betType() === 'Multipla') {
+        <div class="leg-list">
+          @for (leg of legs(); track $index) {
+            <div class="leg-row">
+              <div class="leg-row-head">
+                <div class="leg-row-title">Jogo {{ $index + 1 }}</div>
+                @if (legs().length > 2) {
+                  <button type="button" class="leg-remove" (click)="removeLeg($index)">Remover</button>
+                }
+              </div>
+              <div class="leg-grid">
+                <div class="nb-field">
+                  <label>Desporto</label>
+                  <app-search-select
+                    [options]="sportOptions()"
+                    [value]="leg.sport"
+                    placeholder="Pesquisar desporto…"
+                    (valueChange)="onLegSportChange($index, $event)"></app-search-select>
+                </div>
+                <div class="nb-field">
+                  <label>Campeonato</label>
+                  <app-search-select
+                    [options]="legLeagueOptions(leg)"
+                    [value]="leg.league"
+                    [disabled]="!leg.sport"
+                    disabledHint="Escolhe primeiro o desporto"
+                    placeholder="Pesquisar campeonato…"
+                    (valueChange)="onLegLeagueChange($index, $event)"></app-search-select>
+                </div>
+                <div class="nb-field">
+                  <label>Equipa Casa</label>
+                  <app-search-select
+                    [options]="legTeamOptions(leg)"
+                    [value]="leg.homeTeam"
+                    [disabled]="!leg.sport"
+                    disabledHint="Escolhe primeiro o desporto"
+                    placeholder="Pesquisar equipa…"
+                    (valueChange)="onLegHomeTeamChange($index, $event)"></app-search-select>
+                </div>
+                <div class="nb-field">
+                  <label>Equipa Fora</label>
+                  <app-search-select
+                    [options]="legTeamOptions(leg)"
+                    [value]="leg.awayTeam"
+                    [disabled]="!leg.sport"
+                    disabledHint="Escolhe primeiro o desporto"
+                    placeholder="Pesquisar equipa…"
+                    (valueChange)="onLegAwayTeamChange($index, $event)"></app-search-select>
+                </div>
+                <div class="nb-field" style="grid-column:span 2">
+                  <label>Mercado</label>
+                  <app-search-select
+                    [options]="legMarketOptions(leg)"
+                    [value]="leg.market"
+                    [disabled]="!leg.sport"
+                    disabledHint="Escolhe primeiro o desporto"
+                    placeholder="Pesquisar mercado…"
+                    (valueChange)="onLegMarketChange($index, $event)"></app-search-select>
+                </div>
+                <div class="nb-field leg-odd">
+                  <label>Odd</label>
+                  <input type="text" placeholder="1,50"
+                    [value]="leg.odd"
+                    (input)="updateLegOdd($index, $any($event.target).value)">
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <button class="add-leg-btn" (click)="addLeg()">+ Adicionar Jogo</button>
+
+        <div class="multi-summary">
+          <div class="multi-summary-item">
+            <div class="multi-summary-label">Odd Total</div>
+            <div class="multi-summary-value">{{ multiOddTotal().toFixed(2).replace('.', ',') }}</div>
+          </div>
+          <div class="multi-summary-item">
+            <div class="multi-summary-label">Retorno Potencial</div>
+            <div class="multi-summary-value">€ {{ multiReturn().toFixed(2).replace('.', ',') }}</div>
+          </div>
+        </div>
+
+        <div class="nb-grid" style="grid-template-columns:1fr;">
+          <div class="nb-field">
+            <label>Valor Final (€)</label>
+            <input type="text" placeholder="20,00"
+              [value]="multiStake()"
+              (input)="multiStake.set($any($event.target).value)">
+          </div>
+        </div>
+      }
+
+      <div class="nb-actions">
+        <button class="btn-ghost" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" [disabled]="!canSave() || saving()" (click)="save()">
+          {{ saving() ? 'A guardar…' : 'Guardar Aposta' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,18 @@
+# .NET
+api/**/bin/
+api/**/obj/
+api/**/appsettings.Development.json
+api/**/appsettings.Local.json
+*.user
+
+# Angular / Node
+web/node_modules/
+web/dist/
+web/.angular/
+web/src/environments/environment.local.ts
+
+# Geral
+.vs/
+.vscode/
+*.log
+.DS_Store

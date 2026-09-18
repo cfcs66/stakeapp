@@ -1,0 +1,26 @@
+<div class="ticket">
+  <div class="ticket-status" [class]="statusClass(bet.status)"></div>
+  <div class="ticket-body">
+    <div class="t-main">
+      <div class="t-event">{{ eventLabel() }}</div>
+      <div class="t-market">{{ marketLabel() }}</div>
+      <div class="t-tags">
+        <span class="t-tag">{{ bet.type === 'Multipla' ? 'Múltipla' : 'Simples' }}</span>
+        @if (bet.league) { <span class="t-tag">{{ bet.league }}</span> }
+        <span class="t-tag">{{ dateLabel() }}</span>
+      </div>
+    </div>
+    <div class="t-col ticket-perf" style="padding-left:16px">
+      <div class="t-col-label">Odd</div>
+      <div class="t-col-value">{{ bet.odd.toFixed(2) }}</div>
+    </div>
+    <div class="t-col">
+      <div class="t-col-label">Valor</div>
+      <div class="t-col-value">€ {{ bet.stake.toFixed(2) }}</div>
+    </div>
+    <div class="t-result">
+      <span class="t-result-tag" [class]="statusClass(bet.status)">{{ statusLabel(bet.status) }}</span>
+      <div class="t-profit" [class]="profitClass()">{{ profitText() }}</div>
+    </div>
+  </div>
+</div>

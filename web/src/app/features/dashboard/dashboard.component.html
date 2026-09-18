@@ -1,0 +1,76 @@
+<div class="page-head">
+  <div>
+    <div class="page-title">Dashboard</div>
+    <div class="page-desc">Visão geral da tua atividade e performance</div>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi" style="--kpi-accent:var(--accent)">
+    <div class="kpi-label">Banca Atual</div>
+    <div class="kpi-value">€ {{ (bankState.currentBank() ?? 0).toFixed(2) }}</div>
+  </div>
+  <div class="kpi" style="--kpi-accent:var(--accent-2)">
+    <div class="kpi-label">Apostas no Mês</div>
+    <div class="kpi-value">{{ general().apostasNoMes }}</div>
+  </div>
+  <div class="kpi" style="--kpi-accent:var(--win)">
+    <div class="kpi-label">Lucro Mensal</div>
+    <div class="kpi-value" [class]="general().lucroMensal >= 0 ? 'pos' : 'neg'">{{ formatMoney(general().lucroMensal) }}</div>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:14px">
+  <div class="panel-head">
+    <div class="panel-title">Evolução da Banca</div>
+  </div>
+  <div class="chart-wrap">
+    <svg viewBox="0 0 1080 170" width="100%" height="170" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="bankGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e0a83f" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="#e0a83f" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path [attr.d]="chartPath().area" fill="url(#bankGrad)" stroke="none"/>
+      <path [attr.d]="chartPath().line" fill="none" stroke="#e0a83f" stroke-width="2"/>
+      <circle [attr.cx]="chartPath().last[0]" [attr.cy]="chartPath().last[1]" r="3.5" fill="#e0a83f"/>
+    </svg>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:14px">
+  <div class="panel-head">
+    <div class="panel-title">Calendário de Resultados</div>
+    <div class="panel-link">{{ monthLabel }}</div>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-dow">Seg</div><div class="cal-dow">Ter</div><div class="cal-dow">Qua</div>
+    <div class="cal-dow">Qui</div><div class="cal-dow">Sex</div><div class="cal-dow">Sáb</div><div class="cal-dow">Dom</div>
+  </div>
+  <div class="cal-grid">
+    @for (cell of calendarGrid(); track cell.day) {
+      <div class="cal-cell" [class]="cell.status">
+        <div class="cal-day-num">{{ cell.day }}</div>
+        @if (cell.valor !== undefined) {
+          <div class="cal-figures">
+            <div class="cal-value">{{ formatMoney(cell.valor) }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div class="panel-title">Últimas Apostas</div>
+  </div>
+  <div class="ticket-list">
+    @for (bet of ultimasApostas(); track bet.id) {
+      <app-bet-ticket [bet]="bet"></app-bet-ticket>
+    } @empty {
+      <div class="day-detail-empty">Ainda não tens apostas registadas.</div>
+    }
+  </div>
+</div>

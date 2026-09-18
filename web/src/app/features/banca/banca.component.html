@@ -1,0 +1,73 @@
+<div class="page-head">
+  <div>
+    <div class="page-title">Gestão de Banca</div>
+    <div class="page-desc">Acompanha a evolução da tua banca e os movimentos</div>
+  </div>
+  <button class="new-bet-toggle" (click)="openForm()">+ Registar Movimento</button>
+</div>
+
+<div class="kpi-row" style="grid-template-columns:repeat(2,1fr)">
+  <div class="kpi" style="--kpi-accent:var(--accent)">
+    <div class="kpi-label">Banca Atual</div>
+    <div class="kpi-value">€ {{ (bankState.currentBank() ?? 0).toFixed(2) }}</div>
+  </div>
+  <div class="kpi" style="--kpi-accent:var(--win)">
+    <div class="kpi-label">Lucro desde o Início</div>
+    <div class="kpi-value" [style.color]="lucroDesdeInicio() >= 0 ? 'var(--win)' : 'var(--loss)'">{{ formatMoney(lucroDesdeInicio()) }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><div class="panel-title">Movimentos</div></div>
+  <table class="move-table">
+    <thead>
+      <tr><th>Data</th><th>Tipo</th><th>Descrição</th><th style="text-align:right">Valor</th></tr>
+    </thead>
+    <tbody>
+      @for (m of movements(); track m.id) {
+        <tr>
+          <td class="num">{{ formatDate(m.date) }}</td>
+          <td><span class="move-type" [class]="m.type === 'Deposito' ? 'dep' : 'wd'">{{ m.type === 'Deposito' ? 'Depósito' : 'Levantamento' }}</span></td>
+          <td>{{ m.description || '—' }}</td>
+          <td class="num" style="text-align:right" [style.color]="m.type === 'Deposito' ? 'var(--win)' : 'var(--loss)'">
+            {{ m.type === 'Deposito' ? '+' : '-' }}€ {{ m.amount.toFixed(2) }}
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="4" class="day-detail-empty">Ainda não há movimentos registados.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (formOpen()) {
+  <div class="modal-backdrop open" (mousedown)="closeForm()">
+    <div class="modal" (mousedown)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">Registar Movimento</div>
+        <button class="modal-close" (click)="closeForm()">✕</button>
+      </div>
+
+      <div class="type-toggle">
+        <button [class.active]="formType() === 'Deposito'" (click)="formType.set('Deposito')">Depósito</button>
+        <button [class.active]="formType() === 'Levantamento'" (click)="formType.set('Levantamento')">Levantamento</button>
+      </div>
+
+      <div class="nb-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="nb-field">
+          <label>Valor (€)</label>
+          <input type="text" placeholder="100,00" [value]="formAmount()" (input)="formAmount.set($any($event.target).value)">
+        </div>
+        <div class="nb-field">
+          <label>Descrição (opcional)</label>
+          <input type="text" placeholder="Reforço de banca" [value]="formDescription()" (input)="formDescription.set($any($event.target).value)">
+        </div>
+      </div>
+
+      <div class="nb-actions">
+        <button class="btn-ghost" (click)="closeForm()">Cancelar</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'A guardar…' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+}
