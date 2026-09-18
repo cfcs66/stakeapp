@@ -1,33 +1,57 @@
-# Blueprint do Render — cria os dois serviços automaticamente a partir deste repo
-# https://render.com/docs/blueprint-spec
+# Blueprint do Render
+# Cria automaticamente o frontend e a API
+
 services:
-  # Frontend Angular — servido como site estático
+
+  # =====================================================
+  # FRONTEND ANGULAR
+  # =====================================================
+
   - type: web
     name: stake-web
     runtime: static
+
     rootDir: web
+
     buildCommand: npm install && npm run build
+
     staticPublishPath: dist/stake-ui/browser
+
     envVars:
       - key: API_URL
         sync: false
+
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
 
-  # Backend ASP.NET Core — corre em container Docker
+
+  # =====================================================
+  # BACKEND ASP.NET CORE
+  # =====================================================
+
   - type: web
     name: stake-api
+
     runtime: docker
+
+    plan: free
+
     rootDir: api/StakeApi
+
     dockerfilePath: ./Dockerfile
+
     envVars:
+
       - key: ConnectionStrings__DefaultConnection
         sync: false
+
       - key: AllowedOrigins__0
-        sync: false   # URL do stake-web, depois de criado
+        sync: false
+
       - key: Auth__Password
-        sync: false   # a tua password de acesso à app
+        sync: false
+
       - key: Auth__JwtSecret
-        sync: false   # texto aleatório longo (ex: gerado por `openssl rand -base64 48`)
+        sync: false
